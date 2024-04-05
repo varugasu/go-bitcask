@@ -1,0 +1,28 @@
+package internal_test
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/varugasu/go-bitcask/internal"
+)
+
+func TestSerializeEntry(t *testing.T) {
+	entry := internal.Entry{
+		Timestamp: 1609459200,
+		Key:       []byte("foo"),
+		Value:     []byte("bar"),
+	}
+
+	expected := []byte{
+		0x4b, 0x3a, // crc
+		0x00, 0x00, 0x00, 0x00, 0x5f, 0xee, 0x66, 0x00, // 1609459200
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, // 3
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, // 3
+		0x66, 0x6f, 0x6f, // foo
+		0x62, 0x61, 0x72, // bar
+	}
+	actual := internal.SerializeEntry(&entry)
+
+	assert.Equal(t, expected, actual)
+}
