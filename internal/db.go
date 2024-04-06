@@ -1,9 +1,7 @@
-package bitcask
-
-import "github.com/varugasu/go-bitcask/internal/storage"
+package internal
 
 type Database struct {
-	storage *storage.Disk
+	storage *Disk
 	keyDir  map[string][]KeyDirValue
 }
 
@@ -15,7 +13,7 @@ type KeyDirValue struct {
 }
 
 func NewDatabase(directory string) (*Database, error) {
-	disk, err := storage.NewDisk(directory)
+	disk, err := NewDisk(directory)
 	if err != nil {
 		return nil, err
 	}

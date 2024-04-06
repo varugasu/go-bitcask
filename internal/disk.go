@@ -1,11 +1,9 @@
-package storage
+package internal
 
 import (
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/varugasu/go-bitcask/internal"
 )
 
 type DataFile struct {
@@ -36,8 +34,8 @@ func NewDisk(directory string) (*Disk, error) {
 	return &Disk{ActiveDataFile: dataFile}, nil
 }
 
-func (d *Disk) Write(entry *internal.Entry) error {
-	serializedEntry := internal.SerializeEntry(entry)
+func (d *Disk) Write(entry *Entry) error {
+	serializedEntry := SerializeEntry(entry)
 
 	n, err := d.ActiveDataFile.File.Write(serializedEntry)
 	if err != nil {

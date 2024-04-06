@@ -5,11 +5,10 @@ import (
 	"time"
 
 	"github.com/varugasu/go-bitcask/internal"
-	"github.com/varugasu/go-bitcask/internal/storage"
 )
 
 func main() {
-	disk, err := storage.NewDisk("./data")
+	disk, err := internal.NewDisk("./data")
 	if err != nil {
 		log.Fatalln(err)
 	}
