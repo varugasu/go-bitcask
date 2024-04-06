@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"log"
+
+	"github.com/varugasu/go-bitcask/internal/storage"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	_, err := storage.NewDisk("./data")
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
