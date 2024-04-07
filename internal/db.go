@@ -1,6 +1,9 @@
 package internal
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 type Database struct {
 	storage *Disk
@@ -38,4 +41,26 @@ func (db *Database) Get(key string) ([]byte, error) {
 	}
 
 	return db.storage.Read(value)
+}
+
+func (db *Database) Put(key string, value []byte) error {
+	entry := &Entry{
+		Key:       []byte(key),
+		Value:     value,
+		Timestamp: uint64(time.Now().Unix()),
+	}
+
+	err := db.storage.Write(entry)
+	if err != nil {
+		return err
+	}
+
+	db.keyDir[key] = KeyDirValue{
+		FileId:    db.storage.ActiveDataFile.Directory + "/" + db.storage.ActiveDataFile.Filename,
+		Size:      uint64(len(value)),
+		Position:  uint64(db.storage.ActiveDataFile.CurrentPosition) - uint64(len(value)),
+		Timestamp: entry.Timestamp,
+	}
+
+	return nil
 }

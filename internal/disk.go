@@ -3,7 +3,6 @@ package internal
 import (
 	"bufio"
 	"encoding/binary"
-	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -45,6 +44,11 @@ func (d *Disk) Write(entry *Entry) error {
 		return err
 	}
 
+	err = d.ActiveDataFile.File.Sync()
+	if err != nil {
+		return err
+	}
+
 	d.ActiveDataFile.CurrentPosition += n
 	return nil
 }
@@ -57,7 +61,6 @@ func (d *Disk) Read(value KeyDirValue) ([]byte, error) {
 	defer f.Close()
 
 	reader := bufio.NewReader(f)
-	fmt.Println("Discarding", value.Position)
 	reader.Discard(int(value.Position))
 
 	valueBytes := make([]byte, value.Size)

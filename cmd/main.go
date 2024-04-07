@@ -13,6 +13,8 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	db.Put("foo", []byte("bar"))
+
 	value, err := db.Get("foo")
 	if err != nil {
 		log.Fatalln(err)
