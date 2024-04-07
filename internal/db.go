@@ -1,5 +1,7 @@
 package internal
 
+import "errors"
+
 type Database struct {
 	storage *Disk
 	keyDir  map[string]KeyDirValue
@@ -27,4 +29,13 @@ func NewDatabase(directory string) (*Database, error) {
 		storage: disk,
 		keyDir:  keyDir,
 	}, nil
+}
+
+func (db *Database) Get(key string) ([]byte, error) {
+	value, ok := db.keyDir[key]
+	if !ok {
+		return nil, errors.New("key not found")
+	}
+
+	return db.storage.Read(value)
 }

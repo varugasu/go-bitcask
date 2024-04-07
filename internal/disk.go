@@ -3,6 +3,7 @@ package internal
 import (
 	"bufio"
 	"encoding/binary"
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -46,6 +47,26 @@ func (d *Disk) Write(entry *Entry) error {
 
 	d.ActiveDataFile.CurrentPosition += n
 	return nil
+}
+
+func (d *Disk) Read(value KeyDirValue) ([]byte, error) {
+	f, err := os.Open(value.FileId)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	reader := bufio.NewReader(f)
+	fmt.Println("Discarding", value.Position)
+	reader.Discard(int(value.Position))
+
+	valueBytes := make([]byte, value.Size)
+	_, err = reader.Read(valueBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return valueBytes, nil
 }
 
 func (d *Disk) InitKeyDir() (map[string]KeyDirValue, error) {
@@ -122,13 +143,11 @@ func (d *Disk) InitKeyDir() (map[string]KeyDirValue, error) {
 				FileId:    path,
 				Size:      valueSize,
 				Position: uint64(offset) +
-					8 + // timestamp
-					8 + // keySize
-					8 + // valueSize
+					HEADER_SIZE +
 					keySize,
 			}
 
-			offset += 8 + 8 + 8 + int64(keySize) + int64(valueSize) + 2
+			offset += HEADER_SIZE + int64(keySize) + int64(valueSize)
 		}
 		f.Close()
 	}
