@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const TOMBSTONE = "BITCASK_TOMBSTONE"
+
 type Database struct {
 	storage *Disk
 	keyDir  map[string]ValuePosition
@@ -35,12 +37,21 @@ func NewDatabase(directory string) (*Database, error) {
 }
 
 func (db *Database) Get(key string) ([]byte, error) {
-	value, ok := db.keyDir[key]
+	valuePosition, ok := db.keyDir[key]
 	if !ok {
 		return nil, errors.New("key not found")
 	}
 
-	return db.storage.Read(value)
+	value, err := db.storage.Read(valuePosition)
+	if err != nil {
+		return nil, err
+	}
+
+	if string(value) == TOMBSTONE {
+		return nil, errors.New("deleted")
+	}
+
+	return value, nil
 }
 
 func (db *Database) Put(key string, value []byte) error {
@@ -51,6 +62,25 @@ func (db *Database) Put(key string, value []byte) error {
 	}
 
 	valuePosition, err := db.storage.Write(entry)
+	if err != nil {
+		return err
+	}
+
+	db.keyDir[key] = valuePosition
+
+	return nil
+}
+
+func (db *Database) Delete(key string) error {
+	if _, ok := db.keyDir[key]; !ok {
+		return errors.New("key not found")
+	}
+
+	valuePosition, err := db.storage.Write(&Entry{
+		Key:       []byte(key),
+		Value:     []byte(TOMBSTONE),
+		Timestamp: uint64(time.Now().Unix()),
+	})
 	if err != nil {
 		return err
 	}
