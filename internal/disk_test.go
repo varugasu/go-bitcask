@@ -73,6 +73,26 @@ func (suite *DiskTestSuite) TestInitKeyDir() {
 	}, keyDir["a key"])
 }
 
+func (suite *DiskTestSuite) TestRead() {
+	disk, err := internal.NewDisk(suite.tempDir)
+	require.NoError(suite.T(), err)
+
+	keyDir, err := disk.InitKeyDir()
+	require.NoError(suite.T(), err)
+
+	value, err := disk.Read(keyDir["foo"])
+	require.NoError(suite.T(), err)
+	require.Equal(suite.T(), []byte("bar"), value)
+
+	value, err = disk.Read(keyDir["test"])
+	require.NoError(suite.T(), err)
+	require.Equal(suite.T(), []byte("a value"), value)
+
+	value, err = disk.Read(keyDir["a key"])
+	require.NoError(suite.T(), err)
+	require.Equal(suite.T(), []byte("another value"), value)
+}
+
 func TestDiskTestSuite(t *testing.T) {
 	suite.Run(t, new(DiskTestSuite))
 }
