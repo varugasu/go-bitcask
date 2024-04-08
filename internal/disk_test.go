@@ -20,10 +20,8 @@ func (suite *DiskTestSuite) SetupTest() {
 	require.NoError(suite.T(), err)
 
 	suite.tempDir = dir
-}
 
-func (suite *DiskTestSuite) TestInitKeyDir() {
-	err := os.WriteFile(filepath.Join(suite.tempDir, "1"), internal.SerializeEntry(&internal.Entry{
+	err = os.WriteFile(filepath.Join(suite.tempDir, "1"), internal.SerializeEntry(&internal.Entry{
 		Key:       []byte("foo"),
 		Value:     []byte("bar"),
 		Timestamp: 1609459200,
@@ -40,10 +38,12 @@ func (suite *DiskTestSuite) TestInitKeyDir() {
 	os.WriteFile(filepath.Join(suite.tempDir, "3"), internal.SerializeEntry(&internal.Entry{
 		Key:       []byte("a key"),
 		Value:     []byte("another value"),
-		Timestamp: 1609459201,
+		Timestamp: 1609459202,
 	}), 0o644)
 	require.NoError(suite.T(), err)
+}
 
+func (suite *DiskTestSuite) TestInitKeyDir() {
 	disk, err := internal.NewDisk(suite.tempDir)
 	require.NoError(suite.T(), err)
 
@@ -69,7 +69,7 @@ func (suite *DiskTestSuite) TestInitKeyDir() {
 		FileId:    suite.tempDir + "/3",
 		Size:      13,
 		Position:  31,
-		Timestamp: 1609459201,
+		Timestamp: 1609459202,
 	}, keyDir["a key"])
 }
 
