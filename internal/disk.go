@@ -53,7 +53,7 @@ func (d *Disk) Write(entry *Entry) error {
 	return nil
 }
 
-func (d *Disk) Read(value KeyDirValue) ([]byte, error) {
+func (d *Disk) Read(value ValuePosition) ([]byte, error) {
 	f, err := os.Open(value.FileId)
 	if err != nil {
 		return nil, err
@@ -72,8 +72,8 @@ func (d *Disk) Read(value KeyDirValue) ([]byte, error) {
 	return valueBytes, nil
 }
 
-func (d *Disk) InitKeyDir() (map[string]KeyDirValue, error) {
-	keyDir := make(map[string]KeyDirValue)
+func (d *Disk) InitKeyDir() (map[string]ValuePosition, error) {
+	keyDir := make(map[string]ValuePosition)
 
 	// list all files in the directory
 	files, err := os.ReadDir(d.ActiveDataFile.Directory)
@@ -141,7 +141,7 @@ func (d *Disk) InitKeyDir() (map[string]KeyDirValue, error) {
 
 			key := string(keyBytes)
 
-			keyDir[key] = KeyDirValue{
+			keyDir[key] = ValuePosition{
 				Timestamp: timestamp,
 				FileId:    path,
 				Size:      valueSize,

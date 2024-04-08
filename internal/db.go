@@ -7,10 +7,10 @@ import (
 
 type Database struct {
 	storage *Disk
-	keyDir  map[string]KeyDirValue
+	keyDir  map[string]ValuePosition
 }
 
-type KeyDirValue struct {
+type ValuePosition struct {
 	FileId    string
 	Size      uint64
 	Position  uint64
@@ -55,7 +55,7 @@ func (db *Database) Put(key string, value []byte) error {
 		return err
 	}
 
-	db.keyDir[key] = KeyDirValue{
+	db.keyDir[key] = ValuePosition{
 		FileId:    db.storage.ActiveDataFile.Directory + "/" + db.storage.ActiveDataFile.Filename,
 		Size:      uint64(len(value)),
 		Position:  uint64(db.storage.ActiveDataFile.CurrentPosition) - uint64(len(value)),
