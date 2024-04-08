@@ -100,19 +100,14 @@ func (suite *DiskTestSuite) TestWrite() {
 	_, err = disk.InitKeyDir()
 	require.NoError(suite.T(), err)
 
-	err = disk.Write(&internal.Entry{
+	valuePositon, err := disk.Write(&internal.Entry{
 		Key:       []byte("new key"),
 		Value:     []byte("new value"),
 		Timestamp: 1609459203,
 	})
 	require.NoError(suite.T(), err)
 
-	value, err := disk.Read(internal.ValuePosition{
-		FileId:    filepath.Join(disk.ActiveDataFile.Directory, disk.ActiveDataFile.Filename),
-		Size:      9,
-		Position:  33,
-		Timestamp: 1609459203,
-	})
+	value, err := disk.Read(valuePositon)
 	require.NoError(suite.T(), err)
 	require.Equal(suite.T(), []byte("new value"), value)
 }

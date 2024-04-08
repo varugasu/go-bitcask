@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -36,21 +37,28 @@ func NewDisk(directory string) (*Disk, error) {
 	return &Disk{ActiveDataFile: dataFile}, nil
 }
 
-func (d *Disk) Write(entry *Entry) error {
+func (d *Disk) Write(entry *Entry) (ValuePosition, error) {
 	serializedEntry := SerializeEntry(entry)
 
 	n, err := d.ActiveDataFile.File.Write(serializedEntry)
 	if err != nil {
-		return err
+		return ValuePosition{}, err
 	}
 
 	err = d.ActiveDataFile.File.Sync()
 	if err != nil {
-		return err
+		return ValuePosition{}, err
+	}
+
+	valuePosition := ValuePosition{
+		FileId:    filepath.Join(d.ActiveDataFile.Directory, d.ActiveDataFile.Filename),
+		Size:      uint64(len(entry.Value)),
+		Position:  uint64(d.ActiveDataFile.CurrentPosition) + HEADER_SIZE + uint64(len(entry.Key)),
+		Timestamp: entry.Timestamp,
 	}
 
 	d.ActiveDataFile.CurrentPosition += n
-	return nil
+	return valuePosition, nil
 }
 
 func (d *Disk) Read(value ValuePosition) ([]byte, error) {

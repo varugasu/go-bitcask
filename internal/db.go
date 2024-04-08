@@ -50,17 +50,12 @@ func (db *Database) Put(key string, value []byte) error {
 		Timestamp: uint64(time.Now().Unix()),
 	}
 
-	err := db.storage.Write(entry)
+	valuePosition, err := db.storage.Write(entry)
 	if err != nil {
 		return err
 	}
 
-	db.keyDir[key] = ValuePosition{
-		FileId:    db.storage.ActiveDataFile.Directory + "/" + db.storage.ActiveDataFile.Filename,
-		Size:      uint64(len(value)),
-		Position:  uint64(db.storage.ActiveDataFile.CurrentPosition) - uint64(len(value)),
-		Timestamp: entry.Timestamp,
-	}
+	db.keyDir[key] = valuePosition
 
 	return nil
 }
